@@ -69,3 +69,16 @@ body.handlebar .routeWarning{position:fixed;left:10px;right:10px;bottom:64px;z-i
  #map{height:44vh;min-height:310px}
  .historyStats{grid-template-columns:1fr 1fr}
 }
+
+
+/* V7 */
+.routeBarV7{grid-template-columns:repeat(3,1fr)}
+.mapbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:10px 2px}
+.mapbar span{font-size:12px;color:#aaa;text-align:right}
+#routeTitle{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%}
+@media(max-width:520px){
+  .routeBarV7{grid-template-columns:repeat(3,1fr)}
+  .routeBarV7 strong{font-size:15px}
+}
+body.handlebar .routeBarV7{grid-template-columns:repeat(6,1fr)}
+body.handlebar .routeBarV7 strong{font-size:16px}

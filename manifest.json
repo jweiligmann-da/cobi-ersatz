@@ -1,9 +1,9 @@
 {
-  "name": "COBI Ersatz V6.1",
-  "short_name": "COBI V6.1",
+  "name": "COBI Ersatz V7",
+  "short_name": "COBI V7",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
-  "description": "Fahrrad-Navigation mit Touraufzeichnung und gespeicherten Fahrten"
+  "description": "Fahrrad-Navigation mit GPX, Fortschritt, ETA, Fahrtrichtung und Fahrtenhistorie"
 }

@@ -13,6 +13,16 @@ const x=Math.sin(dLat/2)**2+Math.cos(rad(a[0]))*Math.cos(rad(b[0]))*Math.sin(dLo
 function bearing(a,b){const r=x=>x*Math.PI/180,d=x=>x*180/Math.PI,p1=r(a[0]),p2=r(b[0]),dl=r(b[1]-a[1]);
 const y=Math.sin(dl)*Math.cos(p2),x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);return(d(Math.atan2(y,x))+360)%360;}
 function angleDiff(a,b){return((b-a+540)%360)-180;}
+function compass(deg){
+  if(!Number.isFinite(deg))return "--";
+  const dirs=["N","NO","O","SO","S","SW","W","NW"];
+  return dirs[Math.round(((deg%360)+360)%360/45)%8];
+}
+function formatEta(minutes){
+  if(!Number.isFinite(minutes)||minutes<0)return "--:--";
+  const d=new Date(Date.now()+minutes*60000);
+  return d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+}
 function timeText(ms){const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
 return[h,m,sec].map(v=>String(v).padStart(2,"0")).join(":");}
 function elapsedMs(){return startTime?((running?Date.now():lastRideEnd||Date.now())-startTime):0;}
@@ -33,17 +43,34 @@ function setTurn(turn,remaining){if(turn){const m=Math.max(0,Math.round(turn.dis
 if(turn.diff>0){$("turnIcon").textContent=turn.diff>115?"↶":"↰";$("turnText").textContent=turn.diff>115?"Scharf links":"Links abbiegen";}
 else{$("turnIcon").textContent=turn.diff<-115?"↷":"↱";$("turnText").textContent=turn.diff<-115?"Scharf rechts":"Rechts abbiegen";}}
 else{$("turnIcon").textContent="↑";$("turnText").textContent=remaining<80?"Ziel erreicht":"Route weiter folgen";$("turnDistance").textContent=remaining<80?"":Math.round(Math.min(remaining,999))+" m";}}
-function updateRouteGuidance(p){const n=nearestRouteIndex(p);if(n.idx<0)return;const remaining=Math.max(0,routeTotal-routeCum[n.idx]);
-$("remaining").textContent=(remaining/1000).toFixed(1)+" km";$("offRoute").textContent=Math.round(n.dist)+" m";$("offRoute").className=n.dist>60?"danger":n.dist>30?"warn":"ok";
-setTurn(findNextTurn(n.idx),remaining);$("routeWarning").classList.toggle("hidden",n.dist<=60);}
+function updateRouteGuidance(p){
+  const n=nearestRouteIndex(p);
+  if(n.idx<0)return;
+  const remaining=Math.max(0,routeTotal-routeCum[n.idx]);
+  const done=Math.max(0,routeCum[n.idx]);
+  const pct=routeTotal>0?Math.min(100,(done/routeTotal)*100):0;
 
-$("startBtn").onclick=()=>{if(!navigator.geolocation){$("message").textContent="Dieser Browser unterstützt kein GPS.";return;}
+  $("remaining").textContent=(remaining/1000).toFixed(1)+" km";
+  $("progress").textContent=pct.toFixed(0)+" %";
+  $("offRoute").textContent=Math.round(n.dist)+" m";
+  $("offRoute").className=n.dist>60?"danger":n.dist>30?"warn":"ok";
+
+  // ETA: bevorzugt Fahrtdurchschnitt, sonst 18 km/h als vorsichtiger Startwert
+  const ms=elapsedMs();
+  const hours=ms/3600000;
+  const avg=(hours>0 && totalMeters>100)?(totalMeters/1000)/hours:18;
+  $("eta").textContent=formatEta((remaining/1000)/Math.max(avg,5)*60);
+
+  setTurn(findNextTurn(n.idx),remaining);
+  $("routeWarning").classList.toggle("hidden",n.dist<=60);
+  if(n.dist>60)$("mapInfo").textContent="Achtung: Route verlassen";
+}$("startBtn").onclick=()=>{if(!navigator.geolocation){$("message").textContent="Dieser Browser unterstützt kein GPS.";return;}
 running=true;lastRideEnd=null;startTime=Date.now();lastAccepted=null;totalMeters=0;maxSpeed=0;track=[];$("saveBtn").disabled=true;
 $("startBtn").disabled=true;$("stopBtn").disabled=false;$("gpsStatus").textContent="GPS wird gesucht …";
 timer=setInterval(updateTimer,1000);
 watchId=navigator.geolocation.watchPosition(pos=>{const c=pos.coords,acc=c.accuracy||999,kmh=(c.speed!=null&&c.speed>=0)?c.speed*3.6:0;
 $("accuracy").textContent=Math.round(acc)+" m";$("position").textContent=c.latitude.toFixed(5)+", "+c.longitude.toFixed(5);$("speed").textContent=kmh.toFixed(1);
-$("navSpeed").textContent=kmh.toFixed(1)+" km/h";$("gpsStatus").textContent="GPS aktiv";if(kmh>maxSpeed){maxSpeed=kmh;$("maxSpeed").textContent=maxSpeed.toFixed(1)+" km/h";}
+$("navSpeed").textContent=kmh.toFixed(1)+" km/h";$("heading").textContent=compass(Number.isFinite(c.heading)?c.heading:NaN);$("gpsStatus").textContent="GPS aktiv";if(kmh>maxSpeed){maxSpeed=kmh;$("maxSpeed").textContent=maxSpeed.toFixed(1)+" km/h";}
 updateMap(c.latitude,c.longitude);const p=[c.latitude,c.longitude];if(lastAccepted){const d=hav(lastAccepted,p),moving=(kmh>=1.5)||(d>=8);if(acc<=35&&d>=3&&d<=120&&moving)totalMeters+=d;}
 if(acc<=35)lastAccepted=p;$("distance").textContent=(totalMeters/1000).toFixed(2)+" km";updateAvg();},err=>{$("gpsStatus").textContent="GPS-Fehler";
 $("message").textContent=err.code===1?"Standortzugriff wurde nicht erlaubt.":"GPS-Position konnte nicht bestimmt werden.";},{enableHighAccuracy:true,maximumAge:500,timeout:15000});};
@@ -138,7 +165,7 @@ $("gpxInput").addEventListener("change",async e=>{
     $("turnIcon").textContent="↑";
     $("turnText").textContent="Route geladen";
     $("turnDistance").textContent=(routeTotal/1000).toFixed(1)+" km gesamt";
-    $("message").textContent="GPX geladen: "+file.name+" · "+route.length+" Punkte";
+    $("routeTitle").textContent=routeName;$("progress").textContent="0 %";$("eta").textContent="--:--";$("message").textContent="GPX geladen: "+file.name+" · "+route.length+" Punkte";
     $("routeWarning").classList.add("hidden");
 
     // Direkt zur Navigation wechseln und Karte sauber neu zeichnen

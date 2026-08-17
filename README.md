@@ -1,16 +1,22 @@
-# COBI Ersatz V6.1
+# COBI Ersatz V7
 
-V6.1 repariert den GPX-Import auf iPhone und PC.
+Neu in V7:
+- Fortschritt der Route in %
+- geschätzte Ankunftszeit (ETA)
+- aktuelle Fahrtrichtung (N/NO/O/SO/S/SW/W/NW)
+- Routenname direkt in der Navigation
+- große Abbiegeanzeige aus V6.1 bleibt erhalten
+- Reststrecke und Routenabweichung
+- Lenkeransicht und Auto-Folgen
+- robuste iPhone-GPX-Dateiauswahl aus V6.1 bleibt unverändert
+- Touraufzeichnung und gespeicherte Fahrten bleiben erhalten
 
-Verbessert:
-- GPX-Datei wird mit FileReader eingelesen
-- XML-Namespaces werden robust unterstützt
-- `trkpt` und `rtept` werden erkannt
-- nach dem Laden wird automatisch zur Navigation gewechselt
-- Karte wird nach dem Import neu gezeichnet und auf die Route gezoomt
-- klare Statusmeldung mit Dateiname und Anzahl der GPX-Punkte
-- alle V6-Funktionen bleiben erhalten: Touraufzeichnung, Fahrtenhistorie, Ø/Max-Geschwindigkeit, Navigation und Lenkeransicht
+Wichtig:
+Die Abbiegehinweise werden weiterhin aus der GPX-Geometrie abgeleitet. Straßennamen sind nur
+möglich, wenn sie in einer späteren Version über Kartendaten/Routing ergänzt werden.
 
-GitHub-Update:
-Die fünf Dateien im bestehenden Repository ersetzen.
-Commit-Vorschlag: `COBI Ersatz V6.1`
+## GitHub-Update
+Die fünf Dateien `index.html`, `app.js`, `style.css`, `manifest.json` und `README.md`
+im bestehenden Repository hochladen und die vorhandenen Dateien ersetzen.
+
+Commit-Vorschlag: `COBI Ersatz V7`
