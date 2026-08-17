@@ -83,12 +83,30 @@ $("resetBtn").onclick=()=>{if(running)$("stopBtn").click();totalMeters=0;startTi
 $("distance").textContent="0.00 km";$("rideTime").textContent="00:00:00";$("accuracy").textContent="-- m";$("position").textContent="--";$("avgSpeed").textContent="0.0 km/h";
 $("maxSpeed").textContent="0.0 km/h";$("gpsStatus").textContent="GPS noch nicht gestartet";$("saveBtn").disabled=true;if(trackLine)trackLine.setLatLngs([]);};
 
-function page(which){["ridePage","navPage","historyPage"].forEach(id=>$(id).classList.add("hidden"));
-["rideBtn","navBtn","historyBtn"].forEach(id=>$(id).classList.remove("active"));
-if(which==="ride"){$("ridePage").classList.remove("hidden");$("rideBtn").classList.add("active");}
-if(which==="nav"){$("navPage").classList.remove("hidden");$("navBtn").classList.add("active");initMap();setTimeout(()=>map.invalidateSize(),120);if(currentLatLng)map.setView(currentLatLng,17);else if(route.length)map.fitBounds(gpxLine.getBounds(),{padding:[20,20]});}
-if(which==="history"){$("historyPage").classList.remove("hidden");$("historyBtn").classList.add("active");renderHistory();}}
-$("rideBtn").onclick=()=>page("ride");$("navBtn").onclick=()=>page("nav");$("historyBtn").onclick=()=>page("history");
+function page(which){
+  ["ridePage","navPage","routesPage","historyPage"].forEach(id=>$(id).classList.add("hidden"));
+  ["rideBtn","navBtn","routesBtn","historyBtn"].forEach(id=>$(id).classList.remove("active"));
+
+  if(which==="ride"){
+    $("ridePage").classList.remove("hidden");$("rideBtn").classList.add("active");
+  }
+  if(which==="nav"){
+    $("navPage").classList.remove("hidden");$("navBtn").classList.add("active");
+    initMap();setTimeout(()=>map.invalidateSize(),120);
+    if(currentLatLng)map.setView(currentLatLng,17);
+    else if(route.length&&gpxLine)map.fitBounds(gpxLine.getBounds(),{padding:[20,20]});
+  }
+  if(which==="routes"){
+    $("routesPage").classList.remove("hidden");$("routesBtn").classList.add("active");renderRoutes();
+  }
+  if(which==="history"){
+    $("historyPage").classList.remove("hidden");$("historyBtn").classList.add("active");renderHistory();
+  }
+}
+$("rideBtn").onclick=()=>page("ride");
+$("navBtn").onclick=()=>page("nav");
+$("routesBtn").onclick=()=>page("routes");
+$("historyBtn").onclick=()=>page("history");
 
 $("centerBtn").onclick=()=>{initMap();if(currentLatLng)map.setView(currentLatLng,17);else if(route.length)map.fitBounds(gpxLine.getBounds(),{padding:[20,20]});};
 $("followBtn").onclick=()=>{followMode=!followMode;$("followBtn").textContent="Auto-Folgen: "+(followMode?"AN":"AUS");$("followBtn").classList.toggle("activeTool",followMode);};
@@ -166,7 +184,7 @@ $("gpxInput").addEventListener("change",async e=>{
     $("turnText").textContent="Route geladen";
     $("turnDistance").textContent=(routeTotal/1000).toFixed(1)+" km gesamt";
     $("routeTitle").textContent=routeName;$("progress").textContent="0 %";$("eta").textContent="--:--";$("message").textContent="GPX geladen: "+file.name+" · "+route.length+" Punkte";
-    $("routeWarning").classList.add("hidden");
+    $("routeWarning").classList.add("hidden");saveCurrentRoute();renderRoutes();
 
     // Direkt zur Navigation wechseln und Karte sauber neu zeichnen
     page("nav");
@@ -181,6 +199,121 @@ $("gpxInput").addEventListener("change",async e=>{
     console.error(err);
     $("message").textContent="GPX konnte nicht geladen werden: "+(err.message||"unbekannter Fehler");
   }
+});
+
+
+/* V8: gespeicherte GPX-Routen */
+function loadRoutes(){
+  try{return JSON.parse(localStorage.getItem("cobi_v8_routes")||"[]");}
+  catch{return[];}
+}
+function saveRoutes(arr){
+  localStorage.setItem("cobi_v8_routes",JSON.stringify(arr));
+}
+function saveCurrentRoute(){
+  if(route.length<2)return;
+  let routes=loadRoutes();
+  const item={
+    id:Date.now(),
+    name:routeName||"GPX Route",
+    points:route,
+    distance:routeTotal,
+    saved:new Date().toISOString()
+  };
+  // Gleichnamige Route ersetzen statt doppelt speichern
+  routes=routes.filter(r=>r.name!==item.name);
+  routes.unshift(item);
+  saveRoutes(routes.slice(0,20));
+}
+function activateStoredRoute(r){
+  if(!r||!Array.isArray(r.points)||r.points.length<2)return;
+  route=r.points;routeName=r.name||"Gespeicherte Route";lastNearest=0;
+  buildRouteCum();initMap();
+  if(gpxLine)map.removeLayer(gpxLine);
+  gpxLine=L.polyline(route,{weight:6,dashArray:"10 7"}).addTo(map);
+  $("remaining").textContent=(routeTotal/1000).toFixed(1)+" km";
+  $("offRoute").textContent="-- m";
+  $("turnIcon").textContent="↑";
+  $("turnText").textContent="Route geladen";
+  $("turnDistance").textContent=(routeTotal/1000).toFixed(1)+" km gesamt";
+  $("routeTitle").textContent=routeName;
+  $("progress").textContent="0 %";$("eta").textContent="--:--";
+  localStorage.setItem("cobi_v8_last_route",String(r.id));
+  page("nav");
+  setTimeout(()=>{map.invalidateSize();map.fitBounds(gpxLine.getBounds(),{padding:[20,20]});},200);
+}
+function renderRoutes(){
+  const routes=loadRoutes(),box=$("routesList");
+  $("routeCount").textContent=routes.length;box.innerHTML="";
+  if(!routes.length){
+    box.innerHTML='<div class="empty">Noch keine Routen gespeichert.<br>Oben eine Komoot-GPX-Datei importieren.</div>';
+    return;
+  }
+  routes.forEach(r=>{
+    const item=document.createElement("div");item.className="routeItem";
+    const date=r.saved?new Date(r.saved).toLocaleDateString("de-DE"):"";
+    item.innerHTML=`<h3>${escapeHtml(r.name||"Route")}</h3>
+      <small>Gespeichert ${date}</small>
+      <div class="routeItemStats">
+        <div><span>Distanz</span><strong>${((r.distance||0)/1000).toFixed(1)} km</strong></div>
+        <div><span>GPX-Punkte</span><strong>${r.points?r.points.length:0}</strong></div>
+      </div>
+      <div class="routeActions">
+        <button class="loadRoute" data-load="${r.id}">Route starten</button>
+        <button data-rdel="${r.id}">Löschen</button>
+      </div>`;
+    box.appendChild(item);
+  });
+  box.querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>{
+    const r=loadRoutes().find(x=>x.id===+b.dataset.load);activateStoredRoute(r);
+  });
+  box.querySelectorAll("[data-rdel]").forEach(b=>b.onclick=()=>{
+    saveRoutes(loadRoutes().filter(x=>x.id!==+b.dataset.rdel));renderRoutes();
+  });
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+$("clearRoutesBtn").onclick=()=>{
+  if(confirm("Alle gespeicherten Routen löschen?")){
+    saveRoutes([]);localStorage.removeItem("cobi_v8_last_route");renderRoutes();
+  }
+};
+$("routeImportBtn").onclick=()=>{
+  $("routeImportInput").value="";
+  $("routeImportInput").click();
+};
+
+async function importRouteFile(file,autoSave=true){
+  if(!file)throw new Error("Keine Datei ausgewählt");
+  const txt=await readFileText(file);
+  if(!txt||txt.length<20)throw new Error("Leere Datei");
+  const xml=new DOMParser().parseFromString(txt,"application/xml");
+  if(xml.getElementsByTagName("parsererror").length)throw new Error("Ungültiges XML");
+  const parse=findGpxPoints(xml);
+  if(parse.length<2)throw new Error("Keine GPX-Streckenpunkte gefunden");
+
+  route=parse;lastNearest=0;
+  const names=[...xml.getElementsByTagNameNS("*","name")];
+  routeName=(names[0]&&names[0].textContent?names[0].textContent.trim():"")||file.name.replace(/\.[^.]+$/,"");
+  buildRouteCum();initMap();
+  if(gpxLine)map.removeLayer(gpxLine);
+  gpxLine=L.polyline(route,{weight:6,dashArray:"10 7"}).addTo(map);
+
+  $("remaining").textContent=(routeTotal/1000).toFixed(1)+" km";
+  $("offRoute").textContent="-- m";$("turnIcon").textContent="↑";
+  $("turnText").textContent="Route geladen";
+  $("turnDistance").textContent=(routeTotal/1000).toFixed(1)+" km gesamt";
+  $("routeTitle").textContent=routeName;$("progress").textContent="0 %";$("eta").textContent="--:--";
+  if(autoSave)saveCurrentRoute();
+  $("message").textContent="GPX gespeichert: "+file.name+" · "+route.length+" Punkte";
+  renderRoutes();
+  page("nav");
+  setTimeout(()=>{map.invalidateSize();map.fitBounds(gpxLine.getBounds(),{padding:[20,20]});},250);
+}
+$("routeImportInput").addEventListener("change",async e=>{
+  try{await importRouteFile(e.target.files&&e.target.files[0],true);}
+  catch(err){$("message").textContent="GPX konnte nicht geladen werden: "+(err.message||"unbekannter Fehler");}
 });
 
 function loadHistory(){try{return JSON.parse(localStorage.getItem("cobi_v6_rides")||"[]");}catch{return[];}}
@@ -199,3 +332,19 @@ ${r.routeName?`<small>Route: ${r.routeName}</small>`:""}
 box.appendChild(item);});
 box.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=+b.dataset.del;saveHistory(loadHistory().filter(r=>r.id!==id));renderHistory();});}
 renderHistory();
+
+
+/* Zuletzt verwendete Route beim nächsten Start wieder bereitstellen */
+(function restoreLastRoute(){
+  const id=+localStorage.getItem("cobi_v8_last_route");
+  if(!id)return;
+  const r=loadRoutes().find(x=>x.id===id);
+  if(r&&Array.isArray(r.points)&&r.points.length>1){
+    route=r.points;routeName=r.name||"Gespeicherte Route";lastNearest=0;buildRouteCum();
+    $("remaining").textContent=(routeTotal/1000).toFixed(1)+" km";
+    $("routeTitle").textContent=routeName;
+    $("turnText").textContent="Letzte Route bereit";
+    $("turnDistance").textContent=(routeTotal/1000).toFixed(1)+" km";
+  }
+})();
+renderRoutes();

@@ -82,3 +82,23 @@ body.handlebar .routeWarning{position:fixed;left:10px;right:10px;bottom:64px;z-i
 }
 body.handlebar .routeBarV7{grid-template-columns:repeat(6,1fr)}
 body.handlebar .routeBarV7 strong{font-size:16px}
+
+/* V8 Routenverwaltung */
+.nav5{grid-template-columns:repeat(5,1fr)}
+.routeImport{margin-bottom:10px}
+.routeImport strong{display:block;font-size:18px;margin-bottom:5px}
+.routeImport button{width:100%;margin-top:12px;background:#fff;color:#000}
+.routeItem{background:#171717;border-radius:18px;padding:15px}
+.routeItem h3{margin:0 0 6px;font-size:18px;overflow:hidden;text-overflow:ellipsis}
+.routeItem small{margin-bottom:10px}
+.routeItemStats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.routeItemStats div{background:#111;border-radius:12px;padding:10px}
+.routeItemStats span{display:block;color:#999;font-size:12px}
+.routeItemStats strong{font-size:16px}
+.routeActions{display:grid;grid-template-columns:2fr 1fr;gap:8px}
+.routeActions .loadRoute{background:#fff;color:#000}
+@media(max-width:520px){
+ .nav5{grid-template-columns:repeat(5,1fr)}
+ .nav5 button{font-size:11px;padding:12px 3px}
+}
+body.handlebar #routesPage{display:none!important}

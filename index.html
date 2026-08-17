@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<title>COBI Ersatz V7</title>
+<title>COBI Ersatz V8</title>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="style.css">
@@ -12,7 +12,7 @@
 <body>
 <main class="app">
 <header>
-  <h1>COBI Ersatz V7</h1>
+  <h1>COBI Ersatz V8</h1>
   <span id="clock">--:--</span>
 </header>
 
@@ -76,6 +76,20 @@
   <p class="note">V7: Fortschritt, ETA, Fahrtrichtung und verbesserte Abbiegehinweise.</p>
 </section>
 
+<section id="routesPage" class="hidden">
+  <section class="historyTop card">
+    <div><span>Gespeicherte Routen</span><strong id="routeCount">0</strong></div>
+    <button id="clearRoutesBtn">Alle löschen</button>
+  </section>
+  <div class="routeImport card">
+    <strong>Komoot / GPX importieren</strong>
+    <small>GPX-Datei auswählen. Die Route wird anschließend auf diesem Gerät gespeichert.</small>
+    <button id="routeImportBtn">Neue GPX-Route laden</button>
+    <input id="routeImportInput" class="hiddenFile" type="file">
+  </div>
+  <div id="routesList" class="historyList"></div>
+</section>
+
 <section id="historyPage" class="hidden">
   <section class="historyTop card">
     <div><span>Gespeicherte Fahrten</span><strong id="historyCount">0</strong></div>
@@ -91,14 +105,15 @@
   <button id="resetBtn">Zurücksetzen</button>
 </section>
 
-<nav>
+<nav class="nav5">
   <button id="rideBtn" class="active">Fahrt</button>
   <button id="navBtn">Navigation</button>
+  <button id="routesBtn">Routen</button>
   <button id="historyBtn">Fahrten</button>
   <button id="setupBtn">Setup</button>
 </nav>
 
-<p class="note" id="message">V7 bereit.</p>
+<p class="note" id="message">V8: Routenverwaltung bereit.</p>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
