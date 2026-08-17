@@ -1,14 +1,20 @@
-# COBI Ersatz V4.1
+# COBI Ersatz V5
 
-Diese Version behebt den GPX-Dateiimport auf dem iPhone.
-
-Änderung:
-- Kein `accept=.gpx` Filter mehr im iOS-Dateidialog.
-- Dadurch bleiben GPX-Dateien auf dem iPhone nicht mehr wegen des Dateityp-Filters grau.
-- Die App prüft nach der Auswahl selbst, ob die Datei gültigen GPX/XML-Inhalt enthält.
-- Reststrecke, Routenabweichung, Auto-Folgen und Richtungswechsel aus V4 bleiben erhalten.
+Neu in V5:
+- große Abbiegepfeile und sehr große Distanzanzeige
+- eigene Lenkeransicht / Vollbild-Fahransicht
+- Geschwindigkeit direkt in der Navigation
+- verbesserte Warnung beim Verlassen der Route
+- Auto-Folgen der Karte
+- iPhone-kompatibler GPX-Import aus V4.1
+- Reststrecke und Routenabweichung
+- GPS-Fahrspur und Drift-Filter
 
 ## GitHub-Update
 Die fünf Dateien `index.html`, `app.js`, `style.css`, `manifest.json` und `README.md`
 im bestehenden Repository hochladen und die vorhandenen Dateien ersetzen.
-Commit-Vorschlag: `COBI Ersatz V4.1`
+
+Commit-Vorschlag:
+`COBI Ersatz V5`
+
+Die GitHub-Pages-Adresse bleibt gleich.
