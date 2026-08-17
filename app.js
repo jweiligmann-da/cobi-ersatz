@@ -500,7 +500,7 @@ $("exportRideGpx").onclick=()=>{
   setTimeout(()=>URL.revokeObjectURL(url),2000);
 };
 
-renderHistory();});}
+renderHistory();
 renderHistory();
 
 
