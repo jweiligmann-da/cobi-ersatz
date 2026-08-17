@@ -145,3 +145,23 @@ body.handlebar #routesPage{display:none!important}
   .bikeControlGrid{grid-template-columns:1fr 1fr}
 }
 body.handlebar #bikePage{display:none!important}
+
+
+/* V11 Bike data source */
+.sourceTabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.sourceTabs button{font-size:13px}
+.sourcePanel{margin-top:12px}
+.textInput{
+  width:100%;border:1px solid #333;border-radius:12px;background:#0f0f0f;color:#fff;
+  padding:13px;font-size:14px;margin-top:6px
+}
+.fieldLabel{display:block;color:#aaa;font-size:13px;margin-top:6px}
+.bridgeInfo{margin-top:10px}
+.bridgeInfo pre{
+  white-space:pre-wrap;background:#0f0f0f;border-radius:12px;padding:12px;
+  color:#d6d6d6;font-size:12px;overflow:auto
+}
+.sourceTabs .activeMode{background:#fff;color:#000}
+@media(max-width:520px){
+  .sourceTabs{grid-template-columns:1fr}
+}

@@ -1,13 +1,29 @@
-# COBI Ersatz V10.2
+# COBI Ersatz V11
 
-Fehlerkorrektur für die Bike-Seite auf iPhone/Safari:
-- `app.js` und `style.css` werden mit Versionsnummer geladen
-- dadurch kann Safari nicht mehr die alte V9/V10-JavaScript-Datei aus dem Cache benutzen
-- Bike-Taste öffnet die Bike-Seite
-- Demo ECO / TOUR / SPORT / TURBO bleibt enthalten
-- alle bisherigen Funktionen bleiben erhalten
+Neu in V11:
+- Bike-Datenquellen-Schicht
+- Demo-Modus bleibt erhalten
+- Bike-Daten aus einer JSON-Datei laden
+- HTTPS-Bridge anbinden und alle 2 Sekunden aktualisieren
+- unterstützte Felder:
+  - battery
+  - range
+  - assist
+  - cadence
+  - power
+  - speed
+- Bridge-URL wird lokal gespeichert
+- Beispiel `bike-demo.json` enthalten
+- alle Navigations-, GPX-, Routen- und Fahrtenfunktionen aus V10.2 bleiben erhalten
 
-Nach dem GitHub-Upload die Seite auf dem iPhone vollständig neu laden.
-Oben muss `COBI Ersatz V10.2` stehen.
+Wichtig:
+V11 verbindet sich noch nicht direkt mit Bosch-Hardware. Es stellt die Schnittstelle bereit,
+über die wir in einem nächsten Schritt echte Bosch/COBI-Daten zuführen können.
 
-Commit-Vorschlag: `COBI Ersatz V10.2`
+Für das normale GitHub-Update reichen weiterhin:
+`index.html`, `app.js`, `style.css`, `manifest.json`, `README.md`
+
+Optional zusätzlich:
+`bike-demo.json`
+
+Commit-Vorschlag: `COBI Ersatz V11`

@@ -1,9 +1,9 @@
 {
-  "name": "COBI Ersatz V10.2",
-  "short_name": "COBI V10.2",
+  "name": "COBI Ersatz V11",
+  "short_name": "COBI V11",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
-  "description": "Fahrrad-Navigation mit Bike-Dashboard, gespeicherten Routen und Fahrten"
+  "description": "Fahrrad-Navigation mit Bike-Datenquelle, HTTPS-Bridge, GPX-Routen und Fahrten"
 }

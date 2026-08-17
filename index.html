@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<title>COBI Ersatz V10.2</title>
+<title>COBI Ersatz V11</title>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="style.css?v=10.2">
+<link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 <main class="app">
 <header>
-  <h1>COBI Ersatz V10.2</h1>
+  <h1>COBI Ersatz V11</h1>
   <span id="clock">--:--</span>
 </header>
 
@@ -81,36 +81,73 @@
     <div>
       <span>Bike-Status</span>
       <strong id="bikeStatus">Noch nicht verbunden</strong>
-      <small>V10 bereitet die Bosch/COBI-Datenanzeige vor.</small>
+      <small id="bikeSourceText">Datenquelle: keine</small>
     </div>
     <div class="bikeBadge" id="bikeModeBadge">OFF</div>
   </section>
 
   <section class="bikeGrid">
-    <div class="card"><span>Akku</span><strong id="bikeBattery">-- %</strong><small>Quelle später: Bike / Sensor</small></div>
-    <div class="card"><span>Reichweite</span><strong id="bikeRange">-- km</strong><small>geschätzt / Bike-Daten</small></div>
-    <div class="card"><span>Unterstützung</span><strong id="bikeAssist">--</strong></div>
-    <div class="card"><span>Trittfrequenz</span><strong id="bikeCadence">-- rpm</strong></div>
-    <div class="card"><span>Motorleistung</span><strong id="bikePower">-- W</strong></div>
-    <div class="card"><span>Bike-Geschwindigkeit</span><strong id="bikeSpeed">0.0 km/h</strong></div>
+    <div class="card"><span>Akku</span><strong id="bikeBattery">-- %</strong><small>Battery</small></div>
+    <div class="card"><span>Reichweite</span><strong id="bikeRange">-- km</strong><small>Range</small></div>
+    <div class="card"><span>Unterstützung</span><strong id="bikeAssist">--</strong><small>Assist</small></div>
+    <div class="card"><span>Trittfrequenz</span><strong id="bikeCadence">-- rpm</strong><small>Cadence</small></div>
+    <div class="card"><span>Motorleistung</span><strong id="bikePower">-- W</strong><small>Power</small></div>
+    <div class="card"><span>Bike-Geschwindigkeit</span><strong id="bikeSpeed">0.0 km/h</strong><small>Speed</small></div>
   </section>
 
   <section class="bikeControls card">
-    <strong>Testmodus</strong>
-    <small>Damit können wir die Anzeige schon jetzt prüfen, bevor echte Bosch-Daten angebunden sind.</small>
-    <div class="bikeControlGrid">
-      <button data-mode="ECO">ECO</button>
-      <button data-mode="TOUR">TOUR</button>
-      <button data-mode="SPORT">SPORT</button>
-      <button data-mode="TURBO">TURBO</button>
+    <strong>Datenquelle</strong>
+    <small>V11 kann Demo-Daten, eine lokale JSON-Datei oder eine HTTPS-Bridge verwenden.</small>
+
+    <div class="sourceTabs">
+      <button id="sourceDemoBtn" class="activeMode">Demo</button>
+      <button id="sourceFileBtn">JSON-Datei</button>
+      <button id="sourceBridgeBtn">HTTPS-Bridge</button>
     </div>
-    <div class="bikeControlGrid">
-      <button id="bikeDemoOn">Demo starten</button>
-      <button id="bikeDemoOff">Demo stoppen</button>
+
+    <div id="demoPanel" class="sourcePanel">
+      <div class="bikeControlGrid">
+        <button data-mode="ECO">ECO</button>
+        <button data-mode="TOUR">TOUR</button>
+        <button data-mode="SPORT">SPORT</button>
+        <button data-mode="TURBO">TURBO</button>
+      </div>
+      <div class="bikeControlGrid">
+        <button id="bikeDemoOn">Demo starten</button>
+        <button id="bikeDemoOff">Demo stoppen</button>
+      </div>
+    </div>
+
+    <div id="filePanel" class="sourcePanel hidden">
+      <button id="bikeJsonBtn">Bike-JSON laden</button>
+      <input id="bikeJsonInput" class="hiddenFile" type="file">
+      <small>Erwartete Felder: battery, range, assist, cadence, power, speed</small>
+    </div>
+
+    <div id="bridgePanel" class="sourcePanel hidden">
+      <label class="fieldLabel">Bridge-URL (HTTPS)</label>
+      <input id="bridgeUrl" class="textInput" type="url" placeholder="https://deine-bridge.example/bike.json">
+      <div class="bikeControlGrid">
+        <button id="bridgeConnectBtn">Verbinden</button>
+        <button id="bridgeDisconnectBtn">Trennen</button>
+      </div>
+      <small>Die Bridge muss JSON liefern und Zugriffe von dieser Webseite erlauben.</small>
     </div>
   </section>
 
-  <p class="note">Die echte Bosch-Anbindung folgt separat. V10 stellt zunächst die vollständige Bike-Oberfläche bereit.</p>
+  <section class="card bridgeInfo">
+    <strong>V11 Datenformat</strong>
+    <pre>{
+  "battery": 82,
+  "range": 67,
+  "assist": "TOUR",
+  "cadence": 71,
+  "power": 245,
+  "speed": 23.4
+}</pre>
+  </section>
+
+  <p class="note">V11 bindet noch nicht direkt Bosch-Hardware an. Es stellt die technische Schnittstelle bereit, über die echte Bike-Daten eingespeist werden können.</p>
 </section>
 
 <section id="routesPage" class="hidden">
@@ -166,10 +203,10 @@
   <button id="setupBtn">Setup</button>
 </nav>
 
-<p class="note" id="message">V10.2: Bike-Seite + Cache-Fehler behoben.</p>
+<p class="note" id="message">V11: Bike-Datenquelle und Bridge vorbereitet.</p>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=10.2"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>

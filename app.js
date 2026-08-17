@@ -4,6 +4,7 @@ let route=[],routeCum=[],routeTotal=0,routeName="",followMode=true,lastNearest=0
 let maxSpeed=0,lastRideEnd=null;
 let rideDetailMap=null,rideDetailLine=null,currentDetailRide=null;
 let bikeDemoTimer=null,bikeDemoMode="OFF";
+let bikeSource="demo",bridgeTimer=null;
 
 const $=id=>document.getElementById(id);
 
@@ -209,6 +210,105 @@ $("gpxInput").addEventListener("change",async e=>{
 
 
 
+
+/* V11: Datenquellen / Bike Bridge */
+function showBikePanel(source){
+  bikeSource=source;
+  $("demoPanel").classList.toggle("hidden",source!=="demo");
+  $("filePanel").classList.toggle("hidden",source!=="file");
+  $("bridgePanel").classList.toggle("hidden",source!=="bridge");
+  $("sourceDemoBtn").classList.toggle("activeMode",source==="demo");
+  $("sourceFileBtn").classList.toggle("activeMode",source==="file");
+  $("sourceBridgeBtn").classList.toggle("activeMode",source==="bridge");
+  $("bikeSourceText").textContent="Datenquelle: "+(
+    source==="demo"?"Demo":source==="file"?"JSON-Datei":"HTTPS-Bridge"
+  );
+}
+$("sourceDemoBtn").onclick=()=>showBikePanel("demo");
+$("sourceFileBtn").onclick=()=>showBikePanel("file");
+$("sourceBridgeBtn").onclick=()=>showBikePanel("bridge");
+
+function setBikeData(data,sourceLabel){
+  if(!data||typeof data!=="object")return;
+  const num=(v)=>Number.isFinite(Number(v))?Number(v):null;
+  const battery=num(data.battery), range=num(data.range), cadence=num(data.cadence),
+        power=num(data.power), speed=num(data.speed);
+
+  if(battery!==null)$("bikeBattery").textContent=Math.round(battery)+" %";
+  if(range!==null)$("bikeRange").textContent=range.toFixed(range%1?1:0)+" km";
+  if(data.assist!==undefined&&data.assist!==null){
+    $("bikeAssist").textContent=String(data.assist);
+    $("bikeModeBadge").textContent=String(data.assist);
+  }
+  if(cadence!==null)$("bikeCadence").textContent=Math.round(cadence)+" rpm";
+  if(power!==null)$("bikePower").textContent=Math.round(power)+" W";
+  if(speed!==null)$("bikeSpeed").textContent=speed.toFixed(1)+" km/h";
+
+  $("bikeStatus").textContent="Daten aktiv";
+  $("bikeSourceText").textContent="Datenquelle: "+sourceLabel;
+}
+
+$("bikeJsonBtn").onclick=()=>{
+  $("bikeJsonInput").value="";
+  $("bikeJsonInput").click();
+};
+
+$("bikeJsonInput").addEventListener("change",async e=>{
+  const file=e.target.files&&e.target.files[0];
+  if(!file)return;
+  try{
+    const txt=await readFileText(file);
+    const data=JSON.parse(txt);
+    setBikeData(data,"JSON-Datei");
+    $("message").textContent="Bike-JSON geladen: "+file.name;
+  }catch(err){
+    $("message").textContent="Bike-JSON konnte nicht gelesen werden.";
+  }
+});
+
+async function fetchBridge(){
+  const url=$("bridgeUrl").value.trim();
+  if(!url)return;
+  try{
+    const res=await fetch(url,{cache:"no-store"});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    const data=await res.json();
+    setBikeData(data,"HTTPS-Bridge");
+    $("bikeStatus").textContent="Bridge verbunden";
+  }catch(err){
+    $("bikeStatus").textContent="Bridge-Fehler";
+    $("message").textContent="Bridge nicht erreichbar: "+(err.message||"Fehler");
+  }
+}
+
+$("bridgeConnectBtn").onclick=()=>{
+  const url=$("bridgeUrl").value.trim();
+  if(!url){
+    $("message").textContent="Bitte zuerst eine HTTPS-Bridge-URL eintragen.";
+    return;
+  }
+  if(!/^https:\/\//i.test(url)){
+    $("message").textContent="Die Bridge-URL muss mit https:// beginnen.";
+    return;
+  }
+  localStorage.setItem("cobi_v11_bridge_url",url);
+  if(bridgeTimer)clearInterval(bridgeTimer);
+  fetchBridge();
+  bridgeTimer=setInterval(fetchBridge,2000);
+};
+
+$("bridgeDisconnectBtn").onclick=()=>{
+  if(bridgeTimer)clearInterval(bridgeTimer);
+  bridgeTimer=null;
+  $("bikeStatus").textContent="Bridge getrennt";
+};
+
+(function restoreBridgeUrl(){
+  const url=localStorage.getItem("cobi_v11_bridge_url");
+  if(url)$("bridgeUrl").value=url;
+  showBikePanel("demo");
+})();
+
 /* V10 Bike-Demo / Datenoberfläche */
 function setBikeMode(mode){
   bikeDemoMode=mode;
@@ -238,7 +338,7 @@ function updateBikeDemo(){
 $("bikeDemoOn").onclick=()=>{
   if(bikeDemoTimer)clearInterval(bikeDemoTimer);
   if(bikeDemoMode==="OFF")setBikeMode("TOUR");
-  $("bikeStatus").textContent="Demo aktiv";
+  $("bikeStatus").textContent="Demo aktiv";$("bikeSourceText").textContent="Datenquelle: Demo";
   $("bikeBattery").textContent="82 %";
   updateBikeDemo();
   bikeDemoTimer=setInterval(updateBikeDemo,1500);
@@ -247,7 +347,7 @@ $("bikeDemoOn").onclick=()=>{
 $("bikeDemoOff").onclick=()=>{
   if(bikeDemoTimer)clearInterval(bikeDemoTimer);
   bikeDemoTimer=null;
-  $("bikeStatus").textContent="Noch nicht verbunden";
+  $("bikeStatus").textContent="Noch nicht verbunden";$("bikeSourceText").textContent="Datenquelle: keine";
   setBikeMode("OFF");
   $("bikeBattery").textContent="-- %";
   $("bikeRange").textContent="-- km";
