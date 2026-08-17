@@ -4,17 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<title>COBI Ersatz V4</title>
+<title>COBI Ersatz V4.1</title>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <main class="app">
-<header>
-  <h1>COBI Ersatz V4</h1>
-  <span id="clock">--:--</span>
-</header>
+<header><h1>COBI Ersatz V4.1</h1><span id="clock">--:--</span></header>
 
 <section id="ridePage">
   <section class="speed card">
@@ -22,7 +19,6 @@
     <div><strong id="speed">0.0</strong> <b>km/h</b></div>
     <small id="gpsStatus">GPS noch nicht gestartet</small>
   </section>
-
   <section class="grid">
     <div class="card"><span>Akku</span><strong>-- %</strong><small>Bike-Anbindung folgt</small></div>
     <div class="card"><span>Reichweite</span><strong>-- km</strong><small>Bike-Anbindung folgt</small></div>
@@ -37,11 +33,7 @@
   <section class="navStatus">
     <div class="turnBox">
       <div id="turnIcon">↑</div>
-      <div>
-        <span>Nächster Hinweis</span>
-        <strong id="turnText">Keine Route geladen</strong>
-        <small id="turnDistance">-- m</small>
-      </div>
+      <div><span>Nächster Hinweis</span><strong id="turnText">Keine Route geladen</strong><small id="turnDistance">-- m</small></div>
     </div>
     <div class="routeStats">
       <div><span>Reststrecke</span><strong id="remaining">-- km</strong></div>
@@ -49,20 +41,17 @@
     </div>
   </section>
 
-  <div class="mapbar">
-    <strong>Navigation</strong>
-    <span id="mapInfo">GPX laden oder Fahrt starten</span>
-  </div>
-
+  <div class="mapbar"><strong>Navigation</strong><span id="mapInfo">GPX laden oder Fahrt starten</span></div>
   <div id="map"></div>
 
   <div class="navtools">
     <button id="centerBtn">Auf Position</button>
     <button id="followBtn" class="activeTool">Auto-Folgen: AN</button>
-    <label class="fileBtn">GPX laden<input id="gpxInput" type="file" accept=".gpx,application/gpx+xml"></label>
+    <button id="gpxBtn">GPX / Datei laden</button>
+    <input id="gpxInput" class="hiddenFile" type="file">
   </div>
 
-  <p class="note">V4 erkennt grobe Richtungswechsel aus der GPX-Strecke und meldet Abweichungen von der Route.</p>
+  <p class="note">V4.1: iPhone-Dateiauswahl ohne Dateityp-Filter. Die App prüft die ausgewählte Datei selbst auf GPX-Inhalt.</p>
 </section>
 
 <section class="controls">
@@ -77,8 +66,7 @@
   <button id="bikeBtn">Bike</button>
   <button id="setupBtn">Setup</button>
 </nav>
-
-<p class="note" id="message">V4: GPX-Navigation, Reststrecke, Routenerkennung und Auto-Folgen.</p>
+<p class="note" id="message">V4.1: iPhone-GPX-Import verbessert.</p>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

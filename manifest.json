@@ -1,9 +1,9 @@
 {
-  "name": "COBI Ersatz V4",
-  "short_name": "COBI V4",
+  "name": "COBI Ersatz V4.1",
+  "short_name": "COBI V4.1",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
-  "description": "Fahrrad-Navigation mit GPS, GPX, Reststrecke und Routenerkennung"
+  "description": "COBI Ersatz mit iPhone-kompatiblem GPX-Dateiimport"
 }
