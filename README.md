@@ -1,21 +1,5 @@
-# COBI Ersatz V2
+# COBI Ersatz V3
 
-V2 ergänzt:
-- GPS-Position
-- GPS-Geschwindigkeit
-- gefahrene Distanz
-- Fahrzeit
-- Start / Stop / Reset
-- mobile Oberfläche für iPhone
+Neu: Live-Karte, GPS-Fahrspur, verbesserter GPS-Drift-Filter und GPX-Import.
 
-## Windows-Test
-index.html im Browser öffnen. Die Oberfläche funktioniert direkt.
-
-WICHTIG ZUM GPS:
-Browser erlauben Standortzugriff normalerweise nur in einem sicheren Kontext (HTTPS oder localhost).
-Beim direkten Öffnen als file:// kann GPS daher blockiert sein.
-
-Für einen echten GPS-Test auf dem iPhone stellen wir die Anwendung im nächsten Schritt über HTTPS bereit.
-
-## Nächste Ausbaustufe
-V3: Karte, GPX-Import und Navigation.
+Die fünf Dateien im bestehenden GitHub-Repository hochladen und die vorhandenen Dateien ersetzen. Die GitHub-Pages-Adresse bleibt gleich.
