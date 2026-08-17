@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<title>COBI Ersatz V8</title>
+<title>COBI Ersatz V10</title>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="style.css">
@@ -12,7 +12,7 @@
 <body>
 <main class="app">
 <header>
-  <h1>COBI Ersatz V8</h1>
+  <h1>COBI Ersatz V10</h1>
   <span id="clock">--:--</span>
 </header>
 
@@ -76,6 +76,43 @@
   <p class="note">V7: Fortschritt, ETA, Fahrtrichtung und verbesserte Abbiegehinweise.</p>
 </section>
 
+<section id="bikePage" class="hidden">
+  <section class="bikeHero card">
+    <div>
+      <span>Bike-Status</span>
+      <strong id="bikeStatus">Noch nicht verbunden</strong>
+      <small>V10 bereitet die Bosch/COBI-Datenanzeige vor.</small>
+    </div>
+    <div class="bikeBadge" id="bikeModeBadge">OFF</div>
+  </section>
+
+  <section class="bikeGrid">
+    <div class="card"><span>Akku</span><strong id="bikeBattery">-- %</strong><small>Quelle später: Bike / Sensor</small></div>
+    <div class="card"><span>Reichweite</span><strong id="bikeRange">-- km</strong><small>geschätzt / Bike-Daten</small></div>
+    <div class="card"><span>Unterstützung</span><strong id="bikeAssist">--</strong></div>
+    <div class="card"><span>Trittfrequenz</span><strong id="bikeCadence">-- rpm</strong></div>
+    <div class="card"><span>Motorleistung</span><strong id="bikePower">-- W</strong></div>
+    <div class="card"><span>Bike-Geschwindigkeit</span><strong id="bikeSpeed">0.0 km/h</strong></div>
+  </section>
+
+  <section class="bikeControls card">
+    <strong>Testmodus</strong>
+    <small>Damit können wir die Anzeige schon jetzt prüfen, bevor echte Bosch-Daten angebunden sind.</small>
+    <div class="bikeControlGrid">
+      <button data-mode="ECO">ECO</button>
+      <button data-mode="TOUR">TOUR</button>
+      <button data-mode="SPORT">SPORT</button>
+      <button data-mode="TURBO">TURBO</button>
+    </div>
+    <div class="bikeControlGrid">
+      <button id="bikeDemoOn">Demo starten</button>
+      <button id="bikeDemoOff">Demo stoppen</button>
+    </div>
+  </section>
+
+  <p class="note">Die echte Bosch-Anbindung folgt separat. V10 stellt zunächst die vollständige Bike-Oberfläche bereit.</p>
+</section>
+
 <section id="routesPage" class="hidden">
   <section class="historyTop card">
     <div><span>Gespeicherte Routen</span><strong id="routeCount">0</strong></div>
@@ -98,6 +135,21 @@
   <div id="historyList" class="historyList"></div>
 </section>
 
+
+<section id="rideDetail" class="rideDetail hidden">
+  <div class="rideDetailBox">
+    <div class="rideDetailHead">
+      <strong>Gespeicherte Fahrt</strong>
+      <button id="closeRideDetail">Schließen</button>
+    </div>
+    <div id="rideDetailStats" class="historyStats"></div>
+    <div id="rideMap"></div>
+    <div class="rideDetailActions">
+      <button id="exportRideGpx">GPX exportieren</button>
+    </div>
+  </div>
+</section>
+
 <section class="controls">
   <button id="startBtn">Fahrt starten</button>
   <button id="stopBtn" disabled>Stoppen</button>
@@ -105,15 +157,16 @@
   <button id="resetBtn">Zurücksetzen</button>
 </section>
 
-<nav class="nav5">
+<nav class="nav6">
   <button id="rideBtn" class="active">Fahrt</button>
   <button id="navBtn">Navigation</button>
+  <button id="bikeBtn">Bike</button>
   <button id="routesBtn">Routen</button>
   <button id="historyBtn">Fahrten</button>
   <button id="setupBtn">Setup</button>
 </nav>
 
-<p class="note" id="message">V8: Routenverwaltung bereit.</p>
+<p class="note" id="message">V10: Bike-Oberfläche und COBI-Design bereit.</p>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

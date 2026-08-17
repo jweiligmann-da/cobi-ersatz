@@ -2,6 +2,8 @@ let watchId=null,running=false,lastAccepted=null,totalMeters=0,startTime=null,ti
 let map=null,marker=null,trackLine=null,gpxLine=null,currentLatLng=null,track=[];
 let route=[],routeCum=[],routeTotal=0,routeName="",followMode=true,lastNearest=0,handlebar=false;
 let maxSpeed=0,lastRideEnd=null;
+let rideDetailMap=null,rideDetailLine=null,currentDetailRide=null;
+let bikeDemoTimer=null,bikeDemoMode="OFF";
 
 const $=id=>document.getElementById(id);
 
@@ -69,7 +71,7 @@ running=true;lastRideEnd=null;startTime=Date.now();lastAccepted=null;totalMeters
 $("startBtn").disabled=true;$("stopBtn").disabled=false;$("gpsStatus").textContent="GPS wird gesucht …";
 timer=setInterval(updateTimer,1000);
 watchId=navigator.geolocation.watchPosition(pos=>{const c=pos.coords,acc=c.accuracy||999,kmh=(c.speed!=null&&c.speed>=0)?c.speed*3.6:0;
-$("accuracy").textContent=Math.round(acc)+" m";$("position").textContent=c.latitude.toFixed(5)+", "+c.longitude.toFixed(5);$("speed").textContent=kmh.toFixed(1);
+$("accuracy").textContent=Math.round(acc)+" m";$("position").textContent=c.latitude.toFixed(5)+", "+c.longitude.toFixed(5);$("speed").textContent=kmh.toFixed(1);$("bikeSpeed").textContent=kmh.toFixed(1)+" km/h";
 $("navSpeed").textContent=kmh.toFixed(1)+" km/h";$("heading").textContent=compass(Number.isFinite(c.heading)?c.heading:NaN);$("gpsStatus").textContent="GPS aktiv";if(kmh>maxSpeed){maxSpeed=kmh;$("maxSpeed").textContent=maxSpeed.toFixed(1)+" km/h";}
 updateMap(c.latitude,c.longitude);const p=[c.latitude,c.longitude];if(lastAccepted){const d=hav(lastAccepted,p),moving=(kmh>=1.5)||(d>=8);if(acc<=35&&d>=3&&d<=120&&moving)totalMeters+=d;}
 if(acc<=35)lastAccepted=p;$("distance").textContent=(totalMeters/1000).toFixed(2)+" km";updateAvg();},err=>{$("gpsStatus").textContent="GPS-Fehler";
@@ -84,8 +86,8 @@ $("distance").textContent="0.00 km";$("rideTime").textContent="00:00:00";$("accu
 $("maxSpeed").textContent="0.0 km/h";$("gpsStatus").textContent="GPS noch nicht gestartet";$("saveBtn").disabled=true;if(trackLine)trackLine.setLatLngs([]);};
 
 function page(which){
-  ["ridePage","navPage","routesPage","historyPage"].forEach(id=>$(id).classList.add("hidden"));
-  ["rideBtn","navBtn","routesBtn","historyBtn"].forEach(id=>$(id).classList.remove("active"));
+  ["ridePage","navPage","bikePage","routesPage","historyPage"].forEach(id=>$(id).classList.add("hidden"));
+  ["rideBtn","navBtn","bikeBtn","routesBtn","historyBtn"].forEach(id=>$(id).classList.remove("active"));
 
   if(which==="ride"){
     $("ridePage").classList.remove("hidden");$("rideBtn").classList.add("active");
@@ -96,6 +98,9 @@ function page(which){
     if(currentLatLng)map.setView(currentLatLng,17);
     else if(route.length&&gpxLine)map.fitBounds(gpxLine.getBounds(),{padding:[20,20]});
   }
+  if(which==="bike"){
+    $("bikePage").classList.remove("hidden");$("bikeBtn").classList.add("active");
+  }
   if(which==="routes"){
     $("routesPage").classList.remove("hidden");$("routesBtn").classList.add("active");renderRoutes();
   }
@@ -105,6 +110,7 @@ function page(which){
 }
 $("rideBtn").onclick=()=>page("ride");
 $("navBtn").onclick=()=>page("nav");
+$("bikeBtn").onclick=()=>page("bike");
 $("routesBtn").onclick=()=>page("routes");
 $("historyBtn").onclick=()=>page("history");
 
@@ -201,6 +207,53 @@ $("gpxInput").addEventListener("change",async e=>{
   }
 });
 
+
+
+/* V10 Bike-Demo / Datenoberfläche */
+function setBikeMode(mode){
+  bikeDemoMode=mode;
+  $("bikeModeBadge").textContent=mode;
+  $("bikeAssist").textContent=mode;
+  document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("activeMode",b.dataset.mode===mode));
+}
+document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setBikeMode(b.dataset.mode));
+
+function updateBikeDemo(){
+  const modes={
+    "ECO":{power:[70,180],cad:[55,75],range:[70,110]},
+    "TOUR":{power:[110,260],cad:[60,80],range:[50,85]},
+    "SPORT":{power:[180,420],cad:[65,90],range:[35,65]},
+    "TURBO":{power:[260,650],cad:[70,100],range:[25,50]},
+    "OFF":{power:[0,0],cad:[0,0],range:[0,0]}
+  };
+  const m=modes[bikeDemoMode]||modes.OFF;
+  const rnd=(a,b)=>Math.round(a+Math.random()*(b-a));
+  const battery=Math.max(5,Math.round(Number(($("bikeBattery").textContent||"80").replace(/[^\d]/g,""))||80));
+  $("bikePower").textContent=rnd(m.power[0],m.power[1])+" W";
+  $("bikeCadence").textContent=rnd(m.cad[0],m.cad[1])+" rpm";
+  $("bikeRange").textContent=(bikeDemoMode==="OFF"?"--":rnd(m.range[0],m.range[1]))+(bikeDemoMode==="OFF"?" km":" km");
+  $("bikeBattery").textContent=battery+" %";
+}
+
+$("bikeDemoOn").onclick=()=>{
+  if(bikeDemoTimer)clearInterval(bikeDemoTimer);
+  if(bikeDemoMode==="OFF")setBikeMode("TOUR");
+  $("bikeStatus").textContent="Demo aktiv";
+  $("bikeBattery").textContent="82 %";
+  updateBikeDemo();
+  bikeDemoTimer=setInterval(updateBikeDemo,1500);
+};
+
+$("bikeDemoOff").onclick=()=>{
+  if(bikeDemoTimer)clearInterval(bikeDemoTimer);
+  bikeDemoTimer=null;
+  $("bikeStatus").textContent="Noch nicht verbunden";
+  setBikeMode("OFF");
+  $("bikeBattery").textContent="-- %";
+  $("bikeRange").textContent="-- km";
+  $("bikeCadence").textContent="-- rpm";
+  $("bikePower").textContent="-- W";
+};
 
 /* V8: gespeicherte GPX-Routen */
 function loadRoutes(){
@@ -319,18 +372,135 @@ $("routeImportInput").addEventListener("change",async e=>{
 function loadHistory(){try{return JSON.parse(localStorage.getItem("cobi_v6_rides")||"[]");}catch{return[];}}
 function saveHistory(arr){localStorage.setItem("cobi_v6_rides",JSON.stringify(arr));}
 function rideSummary(){const ms=elapsedMs(),hours=ms/3600000,km=totalMeters/1000,avg=hours>0?km/hours:0;
-return{id:Date.now(),date:new Date().toISOString(),distanceKm:km,durationMs:ms,avgKmh:avg,maxKmh:maxSpeed,routeName:routeName||"",track:track.slice(0,3000)};}
+return{id:Date.now(),date:new Date().toISOString(),distanceKm:km,durationMs:ms,avgKmh:avg,maxKmh:maxSpeed,routeName:routeName||"",track:track.slice(0,10000)};}
 $("saveBtn").onclick=()=>{const rides=loadHistory();rides.unshift(rideSummary());saveHistory(rides.slice(0,100));$("message").textContent="Fahrt gespeichert."; $("saveBtn").disabled=true;renderHistory();};
 $("clearHistoryBtn").onclick=()=>{if(confirm("Alle gespeicherten Fahrten löschen?")){saveHistory([]);renderHistory();}};
-function renderHistory(){const rides=loadHistory();$("historyCount").textContent=rides.length;const box=$("historyList");box.innerHTML="";
-if(!rides.length){box.innerHTML='<div class="empty">Noch keine Fahrten gespeichert.</div>';return;}
-rides.forEach(r=>{const d=new Date(r.date);const item=document.createElement("div");item.className="historyItem";
-item.innerHTML=`<h3>${d.toLocaleDateString("de-DE")} · ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}</h3>
-<div class="historyStats"><div><span>Distanz</span><strong>${r.distanceKm.toFixed(2)} km</strong></div><div><span>Fahrzeit</span><strong>${timeText(r.durationMs)}</strong></div><div><span>Ø</span><strong>${r.avgKmh.toFixed(1)} km/h</strong></div><div><span>Max</span><strong>${r.maxKmh.toFixed(1)} km/h</strong></div></div>
-${r.routeName?`<small>Route: ${r.routeName}</small>`:""}
-<div class="historyActions"><button data-del="${r.id}">Löschen</button></div>`;
-box.appendChild(item);});
-box.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=+b.dataset.del;saveHistory(loadHistory().filter(r=>r.id!==id));renderHistory();});}
+function renderHistory(){
+  const rides=loadHistory();
+  $("historyCount").textContent=rides.length;
+  const box=$("historyList");
+  box.innerHTML="";
+
+  if(!rides.length){
+    box.innerHTML='<div class="empty">Noch keine Fahrten gespeichert.</div>';
+    return;
+  }
+
+  rides.forEach(r=>{
+    const d=new Date(r.date);
+    const item=document.createElement("div");
+    item.className="historyItem";
+    item.innerHTML=`<h3>${d.toLocaleDateString("de-DE")} · ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}</h3>
+      <div class="historyStats">
+        <div><span>Distanz</span><strong>${r.distanceKm.toFixed(2)} km</strong></div>
+        <div><span>Fahrzeit</span><strong>${timeText(r.durationMs)}</strong></div>
+        <div><span>Ø</span><strong>${r.avgKmh.toFixed(1)} km/h</strong></div>
+        <div><span>Max</span><strong>${r.maxKmh.toFixed(1)} km/h</strong></div>
+      </div>
+      ${r.routeName?`<small>Route: ${escapeHtml(r.routeName)}</small>`:""}
+      <div class="historyActions">
+        <button class="showRide" data-show="${r.id}">Auf Karte anzeigen</button>
+        <button data-del="${r.id}">Löschen</button>
+      </div>`;
+    box.appendChild(item);
+  });
+
+  box.querySelectorAll("[data-show]").forEach(b=>b.onclick=()=>{
+    const r=loadHistory().find(x=>x.id===+b.dataset.show);
+    showRideDetail(r);
+  });
+
+  box.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    const id=+b.dataset.del;
+    saveHistory(loadHistory().filter(r=>r.id!==id));
+    renderHistory();
+  });
+}
+
+function showRideDetail(r){
+  if(!r)return;
+  currentDetailRide=r;
+  $("rideDetail").classList.remove("hidden");
+
+  $("rideDetailStats").innerHTML=`
+    <div><span>Distanz</span><strong>${Number(r.distanceKm||0).toFixed(2)} km</strong></div>
+    <div><span>Fahrzeit</span><strong>${timeText(r.durationMs||0)}</strong></div>
+    <div><span>Ø</span><strong>${Number(r.avgKmh||0).toFixed(1)} km/h</strong></div>
+    <div><span>Max</span><strong>${Number(r.maxKmh||0).toFixed(1)} km/h</strong></div>`;
+
+  setTimeout(()=>{
+    if(!rideDetailMap){
+      rideDetailMap=L.map("rideMap").setView([51.16,10.45],6);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+        maxZoom:19,attribution:"&copy; OpenStreetMap"
+      }).addTo(rideDetailMap);
+    }
+    if(rideDetailLine){
+      rideDetailMap.removeLayer(rideDetailLine);
+      rideDetailLine=null;
+    }
+
+    const pts=Array.isArray(r.track)?r.track.filter(p=>Array.isArray(p)&&p.length>=2):[];
+    if(pts.length>1){
+      rideDetailLine=L.polyline(pts,{weight:5}).addTo(rideDetailMap);
+      rideDetailMap.fitBounds(rideDetailLine.getBounds(),{padding:[20,20]});
+    }else{
+      rideDetailMap.setView([51.16,10.45],6);
+    }
+    rideDetailMap.invalidateSize();
+  },150);
+}
+
+$("closeRideDetail").onclick=()=>{
+  $("rideDetail").classList.add("hidden");
+  currentDetailRide=null;
+};
+
+function xmlEscape(s){
+  return String(s||"").replace(/[<>&'"]/g,c=>({
+    "<":"&lt;",">":"&gt;","&":"&amp;","'":"&apos;",'"':"&quot;"
+  }[c]));
+}
+
+function rideToGpx(r){
+  const pts=Array.isArray(r.track)?r.track:[];
+  const name=r.routeName||("COBI Fahrt "+new Date(r.date||Date.now()).toLocaleDateString("de-DE"));
+  const trk=pts.map(p=>`<trkpt lat="${Number(p[0]).toFixed(7)}" lon="${Number(p[1]).toFixed(7)}"></trkpt>`).join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="COBI Ersatz V9" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>${xmlEscape(name)}</name></metadata>
+  <trk><name>${xmlEscape(name)}</name><trkseg>
+${trk}
+  </trkseg></trk>
+</gpx>`;
+}
+
+function safeFileName(s){
+  return String(s||"cobi-fahrt").replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g,"-").slice(0,80);
+}
+
+$("exportRideGpx").onclick=()=>{
+  if(!currentDetailRide)return;
+  const pts=Array.isArray(currentDetailRide.track)?currentDetailRide.track:[];
+  if(pts.length<2){
+    $("message").textContent="Diese Fahrt enthält noch keine ausreichenden GPS-Punkte für einen GPX-Export.";
+    return;
+  }
+
+  const gpx=rideToGpx(currentDetailRide);
+  const blob=new Blob([gpx],{type:"application/gpx+xml"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  const date=new Date(currentDetailRide.date||Date.now()).toISOString().slice(0,10);
+  a.download=safeFileName(`COBI-Fahrt-${date}`)+".gpx";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+};
+
+renderHistory();});}
 renderHistory();
 
 

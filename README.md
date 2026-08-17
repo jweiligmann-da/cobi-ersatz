@@ -1,23 +1,24 @@
-# COBI Ersatz V8
+# COBI Ersatz V10
 
-Neu in V8:
-- eigener Bereich **Routen**
-- Komoot-/GPX-Routen dauerhaft auf dem iPhone/Browser speichern
-- gespeicherte Route später ohne erneuten Dateiimport auswählen
-- Routenname, Distanz und Anzahl GPX-Punkte anzeigen
-- einzelne Routen löschen
-- alle gespeicherten Routen löschen
-- zuletzt verwendete Route wird für den nächsten Start vorgemerkt
-- maximal 20 Routen lokal gespeichert
-- V7-Navigation, ETA, Fortschritt, Lenkeransicht und Fahrtenhistorie bleiben erhalten
-- robuster iPhone-GPX-Import bleibt erhalten
-
-Hinweis:
-Die Routen werden lokal im Browser gespeichert. Werden die Websitedaten von Safari gelöscht,
-werden auch die gespeicherten Routen entfernt.
+Neu in V10:
+- eigener Bereich **Bike**
+- vorbereitete Anzeige für Akku, Reichweite, Unterstützungsstufe, Trittfrequenz, Motorleistung und Bike-Geschwindigkeit
+- COBI-ähnliche Bike-Oberfläche
+- Demo-Modus für ECO / TOUR / SPORT / TURBO
+- Bike-Geschwindigkeit übernimmt bereits die GPS-Geschwindigkeit
+- echte Bosch-/COBI-Anbindung wird in einer späteren Stufe ergänzt
+- alle Funktionen aus V9 bleiben erhalten:
+  - GPX-Navigation
+  - Routenverwaltung
+  - ETA und Fortschritt
+  - Lenkeransicht
+  - Touraufzeichnung
+  - Fahrtenhistorie
+  - Fahrt auf Karte anzeigen
+  - GPX-Export
 
 ## GitHub-Update
 Die fünf Dateien `index.html`, `app.js`, `style.css`, `manifest.json` und `README.md`
 im bestehenden Repository hochladen und ersetzen.
 
-Commit-Vorschlag: `COBI Ersatz V8`
+Commit-Vorschlag: `COBI Ersatz V10`
