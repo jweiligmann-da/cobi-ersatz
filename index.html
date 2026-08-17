@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<title>COBI Ersatz V5</title>
+<title>COBI Ersatz V6</title>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="style.css">
@@ -12,7 +12,7 @@
 <body>
 <main class="app">
 <header>
-  <h1>COBI Ersatz V5</h1>
+  <h1>COBI Ersatz V6</h1>
   <span id="clock">--:--</span>
 </header>
 
@@ -30,6 +30,8 @@
     <div class="card"><span>Fahrzeit</span><strong id="rideTime">00:00:00</strong></div>
     <div class="card"><span>GPS-Genauigkeit</span><strong id="accuracy">-- m</strong></div>
     <div class="card"><span>Position</span><strong id="position">--</strong></div>
+    <div class="card"><span>Ø Geschwindigkeit</span><strong id="avgSpeed">0.0 km/h</strong></div>
+    <div class="card"><span>Max. Geschwindigkeit</span><strong id="maxSpeed">0.0 km/h</strong></div>
   </section>
 </section>
 
@@ -49,11 +51,6 @@
     <div><span>Geschw.</span><strong id="navSpeed">0.0 km/h</strong></div>
   </section>
 
-  <div class="mapbar">
-    <strong>Navigation</strong>
-    <span id="mapInfo">GPX laden oder Fahrt starten</span>
-  </div>
-
   <div id="map"></div>
 
   <div class="navtools">
@@ -67,24 +64,34 @@
   <section id="routeWarning" class="routeWarning hidden">
     Route verlassen – bitte zur Strecke zurückfahren.
   </section>
+</section>
 
-  <p class="note">V5: Große Abbiegeanzeige, Lenkeransicht, bessere Routenwarnung und optimierte iPhone-Darstellung.</p>
+<section id="historyPage" class="hidden">
+  <section class="historyTop card">
+    <div>
+      <span>Gespeicherte Fahrten</span>
+      <strong id="historyCount">0</strong>
+    </div>
+    <button id="clearHistoryBtn">Alle löschen</button>
+  </section>
+  <div id="historyList" class="historyList"></div>
 </section>
 
 <section class="controls">
   <button id="startBtn">Fahrt starten</button>
   <button id="stopBtn" disabled>Stoppen</button>
+  <button id="saveBtn" disabled>Fahrt speichern</button>
   <button id="resetBtn">Zurücksetzen</button>
 </section>
 
 <nav>
   <button id="rideBtn" class="active">Fahrt</button>
   <button id="navBtn">Navigation</button>
-  <button id="bikeBtn">Bike</button>
+  <button id="historyBtn">Fahrten</button>
   <button id="setupBtn">Setup</button>
 </nav>
 
-<p class="note" id="message">V5 bereit.</p>
+<p class="note" id="message">V6: Touraufzeichnung und gespeicherte Fahrten.</p>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

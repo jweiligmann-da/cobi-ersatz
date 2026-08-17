@@ -1,9 +1,9 @@
 {
-  "name": "COBI Ersatz V5",
-  "short_name": "COBI V5",
+  "name": "COBI Ersatz V6",
+  "short_name": "COBI V6",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
-  "description": "Fahrrad-Navigation mit großer Abbiegeanzeige, GPX, Reststrecke und Lenkeransicht"
+  "description": "Fahrrad-Navigation mit Touraufzeichnung und gespeicherten Fahrten"
 }
