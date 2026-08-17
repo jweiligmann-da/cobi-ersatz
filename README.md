@@ -1,20 +1,16 @@
-# COBI Ersatz V6
+# COBI Ersatz V6.1
 
-Neu in V6:
-- Fahrtaufzeichnung
-- Fahrten lokal auf dem iPhone/Browser speichern
-- Fahrtenliste mit Datum und Uhrzeit
-- Distanz, Fahrzeit, Durchschnitts- und Maximalgeschwindigkeit speichern
-- bis zu 100 Fahrten im Browser speichern
-- einzelne Fahrten oder komplette Historie löschen
-- GPX-Navigation, Lenkeransicht und iPhone-Dateiimport aus V5 bleiben erhalten
+V6.1 repariert den GPX-Import auf iPhone und PC.
 
-Wichtig:
-Die gespeicherten Fahrten liegen lokal im Browser (localStorage). Wenn Safari-Websitedaten
-gelöscht werden, werden auch diese Fahrten gelöscht.
+Verbessert:
+- GPX-Datei wird mit FileReader eingelesen
+- XML-Namespaces werden robust unterstützt
+- `trkpt` und `rtept` werden erkannt
+- nach dem Laden wird automatisch zur Navigation gewechselt
+- Karte wird nach dem Import neu gezeichnet und auf die Route gezoomt
+- klare Statusmeldung mit Dateiname und Anzahl der GPX-Punkte
+- alle V6-Funktionen bleiben erhalten: Touraufzeichnung, Fahrtenhistorie, Ø/Max-Geschwindigkeit, Navigation und Lenkeransicht
 
-## GitHub-Update
-Die fünf Dateien `index.html`, `app.js`, `style.css`, `manifest.json` und `README.md`
-im bestehenden Repository hochladen und die vorhandenen Dateien ersetzen.
-
-Commit-Vorschlag: `COBI Ersatz V6`
+GitHub-Update:
+Die fünf Dateien im bestehenden Repository ersetzen.
+Commit-Vorschlag: `COBI Ersatz V6.1`

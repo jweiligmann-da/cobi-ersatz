@@ -68,15 +68,93 @@ $("followBtn").onclick=()=>{followMode=!followMode;$("followBtn").textContent="A
 $("fullscreenBtn").onclick=()=>{handlebar=!handlebar;document.body.classList.toggle("handlebar",handlebar);$("fullscreenBtn").textContent=handlebar?"Normalansicht":"Lenkeransicht";setTimeout(()=>{if(map)map.invalidateSize();},150);};
 $("setupBtn").onclick=()=>alert("Setup wird später erweitert.");
 
-$("gpxBtn").onclick=()=>{$("gpxInput").value="";$("gpxInput").click();};
-$("gpxInput").addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;
-try{const txt=await file.text();if(!txt||(!txt.includes("<gpx")&&!txt.includes("<trkpt")&&!txt.includes("<rtept")))throw 0;
-const xml=new DOMParser().parseFromString(txt,"application/xml");if(xml.querySelector("parsererror"))throw 0;
-const parse=[...xml.querySelectorAll("trkpt,rtept")].map(n=>[+n.getAttribute("lat"),+n.getAttribute("lon")]).filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1]));if(parse.length<2)throw 0;
-route=parse;lastNearest=0;const nameNode=xml.querySelector("trk > name, rte > name, metadata > name");routeName=(nameNode&&nameNode.textContent?nameNode.textContent.trim():"")||file.name.replace(/\.[^.]+$/,"");
-buildRouteCum();initMap();if(gpxLine)map.removeLayer(gpxLine);gpxLine=L.polyline(route,{weight:6,dashArray:"10 7"}).addTo(map);map.fitBounds(gpxLine.getBounds(),{padding:[20,20]});
-$("remaining").textContent=(routeTotal/1000).toFixed(1)+" km";$("offRoute").textContent="-- m";$("turnIcon").textContent="↑";$("turnText").textContent="Route geladen";
-$("turnDistance").textContent=(routeTotal/1000).toFixed(1)+" km gesamt";$("message").textContent="GPX geladen: "+file.name;}catch{$("message").textContent="Die ausgewählte Datei ist keine lesbare GPX-Datei.";}});
+$("gpxBtn").onclick=()=>{
+  const input=$("gpxInput");
+  input.value="";
+  input.click();
+};
+
+function readFileText(file){
+  return new Promise((resolve,reject)=>{
+    try{
+      const reader=new FileReader();
+      reader.onload=()=>resolve(String(reader.result||""));
+      reader.onerror=()=>reject(reader.error||new Error("Datei konnte nicht gelesen werden"));
+      reader.readAsText(file);
+    }catch(err){reject(err);}
+  });
+}
+
+function findGpxPoints(xml){
+  const all=[];
+  const trk=[...xml.getElementsByTagNameNS("*","trkpt")];
+  const rte=[...xml.getElementsByTagNameNS("*","rtept")];
+  const nodes=trk.length?trk:rte;
+  for(const n of nodes){
+    const lat=parseFloat(n.getAttribute("lat"));
+    const lon=parseFloat(n.getAttribute("lon"));
+    if(Number.isFinite(lat)&&Number.isFinite(lon))all.push([lat,lon]);
+  }
+  return all;
+}
+
+$("gpxInput").addEventListener("change",async e=>{
+  const file=e.target.files&&e.target.files[0];
+  if(!file){
+    $("message").textContent="Keine Datei ausgewählt.";
+    return;
+  }
+
+  $("message").textContent="GPX wird geladen: "+file.name;
+
+  try{
+    const txt=await readFileText(file);
+    if(!txt || txt.length<20) throw new Error("Leere Datei");
+
+    const xml=new DOMParser().parseFromString(txt,"application/xml");
+    if(xml.getElementsByTagName("parsererror").length) throw new Error("Ungültiges XML");
+
+    const parse=findGpxPoints(xml);
+    if(parse.length<2) throw new Error("Keine GPX-Streckenpunkte gefunden");
+
+    route=parse;
+    lastNearest=0;
+
+    const names=[
+      ...xml.getElementsByTagNameNS("*","name")
+    ];
+    routeName=(names[0]&&names[0].textContent?names[0].textContent.trim():"") ||
+              file.name.replace(/\.[^.]+$/,"");
+
+    buildRouteCum();
+    initMap();
+
+    if(gpxLine)map.removeLayer(gpxLine);
+    gpxLine=L.polyline(route,{weight:6,dashArray:"10 7"}).addTo(map);
+    map.fitBounds(gpxLine.getBounds(),{padding:[20,20]});
+
+    $("remaining").textContent=(routeTotal/1000).toFixed(1)+" km";
+    $("offRoute").textContent="-- m";
+    $("turnIcon").textContent="↑";
+    $("turnText").textContent="Route geladen";
+    $("turnDistance").textContent=(routeTotal/1000).toFixed(1)+" km gesamt";
+    $("message").textContent="GPX geladen: "+file.name+" · "+route.length+" Punkte";
+    $("routeWarning").classList.add("hidden");
+
+    // Direkt zur Navigation wechseln und Karte sauber neu zeichnen
+    page("nav");
+    setTimeout(()=>{
+      if(map){
+        map.invalidateSize();
+        map.fitBounds(gpxLine.getBounds(),{padding:[20,20]});
+      }
+    },250);
+
+  }catch(err){
+    console.error(err);
+    $("message").textContent="GPX konnte nicht geladen werden: "+(err.message||"unbekannter Fehler");
+  }
+});
 
 function loadHistory(){try{return JSON.parse(localStorage.getItem("cobi_v6_rides")||"[]");}catch{return[];}}
 function saveHistory(arr){localStorage.setItem("cobi_v6_rides",JSON.stringify(arr));}
