@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <title>COBI Ersatz V2</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header><h1>COBI Ersatz V2</h1><span id="clock">--:--</span></header>
+
+    <section class="speed card">
+      <span>Geschwindigkeit</span>
+      <div><strong id="speed">0.0</strong> <b>km/h</b></div>
+      <small id="gpsStatus">GPS noch nicht gestartet</small>
+    </section>
+
+    <section class="grid">
+      <div class="card"><span>Akku</span><strong>-- %</strong><small>Bike-Anbindung folgt</small></div>
+      <div class="card"><span>Reichweite</span><strong>-- km</strong><small>Bike-Anbindung folgt</small></div>
+      <div class="card"><span>Distanz</span><strong id="distance">0.00 km</strong></div>
+      <div class="card"><span>Fahrzeit</span><strong id="rideTime">00:00:00</strong></div>
+      <div class="card"><span>GPS-Genauigkeit</span><strong id="accuracy">-- m</strong></div>
+      <div class="card"><span>Position</span><strong id="position">--</strong></div>
+    </section>
+
+    <section class="controls">
+      <button id="startBtn">Fahrt starten</button>
+      <button id="stopBtn" disabled>Stoppen</button>
+      <button id="resetBtn">Zurücksetzen</button>
+    </section>
+
+    <nav>
+      <button class="active">Fahrt</button>
+      <button id="navBtn">Navigation</button>
+      <button id="bikeBtn">Bike</button>
+      <button id="setupBtn">Setup</button>
+    </nav>
+    <p class="note" id="message">V2: GPS, Geschwindigkeit, Distanz und Fahrzeit.</p>
+  </main>
+<script src="app.js"></script>
+</body>
+</html>

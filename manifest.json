@@ -1,0 +1,8 @@
+{
+  "name": "COBI Ersatz V2",
+  "short_name": "COBI V2",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505"
+}
